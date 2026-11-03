@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard - The Color Game{% endblock %}
+{% block content %}
+<h1 class="title small">Leaderboard</h1>
+<p class="center">
+  {% for m in modes %}
+    <a class="pill {% if m == mode %}active{% endif %}" href="/leaderboard?mode={{ m }}">{{ m }}</a>
+  {% endfor %}
+</p>
+
+<div class="card table-card">
+  {% if entries %}
+  <table class="board">
+    <thead><tr><th>#</th><th>Player</th><th>Correct</th><th>Mean RT</th><th>Accuracy</th><th>Stroop</th></tr></thead>
+    <tbody>
+    {% for e in entries %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ e.player }}</td>
+        <td>{{ e.correct }}</td>
+        <td>{{ e.mean_rt }} ms</td>
+        <td>{{ (e.accuracy * 100)|round|int }}%</td>
+        <td>{{ e.stroop_effect_ms }} ms</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted center">No finished {{ mode }} runs yet. <a class="link" href="/">Play one!</a></p>
+  {% endif %}
+</div>
+{% endblock %}

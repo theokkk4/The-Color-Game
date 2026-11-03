@@ -1,0 +1,35 @@
+{# Shared game board: countdown, word, progress bar, results. Included by game.html and room.html. #}
+<section id="screen-countdown" class="screen hidden">
+  <div class="countdown" id="countdown-number">3</div>
+  <p class="muted" id="countdown-hint"></p>
+</section>
+
+<section id="screen-play" class="screen hidden">
+  <div class="progress"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="word-wrap">
+    <div class="word" id="word">&nbsp;</div>
+  </div>
+  <p class="key-hint">
+    {% for key, color in keys.items() %}
+      <kbd style="color:{{ color_hex[color] }}">{{ key }}</kbd>{% if not loop.last %} &nbsp; {% endif %}
+    {% endfor %}
+  </p>
+</section>
+
+<section id="screen-results" class="screen hidden">
+  <h2 id="results-title">Results</h2>
+  <div class="tiles">
+    <div class="card tile"><div class="tile-value" id="tile-rt">-</div><div class="tile-label">mean reaction time</div></div>
+    <div class="card tile"><div class="tile-value" id="tile-acc">-</div><div class="tile-label">accuracy</div></div>
+    <div class="card tile"><div class="tile-value" id="tile-stroop">-</div><div class="tile-label">Stroop effect</div></div>
+  </div>
+  <div class="card sparkline-card">
+    <div class="tile-label">reaction time per trial</div>
+    <canvas id="sparkline" width="600" height="120"></canvas>
+  </div>
+  <div class="actions">
+    <a class="btn" id="btn-again" href="#">Play again</a>
+    <a class="btn btn-ghost" href="/">Home</a>
+    <a class="btn btn-ghost" href="/leaderboard">Leaderboard</a>
+  </div>
+</section>

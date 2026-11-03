@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1 class="title">The Color Game</h1>
+  <p class="tagline">Name the <span class="ink" style="color:{{ color_hex['blue'] }}">color</span>, not the word. Faster than you think?</p>
+
+  <label class="name-label" for="player-name">Your name</label>
+  <input id="player-name" class="name-input" type="text" maxlength="20" placeholder="e.g. Theo" autocomplete="off">
+</section>
+
+<section class="mode-grid">
+  <a class="card mode-card" href="/game?mode=classic" data-mode="classic">
+    <h2>Classic</h2>
+    <p>Press the key for the <strong>ink color</strong> of the word.</p>
+  </a>
+  <a class="card mode-card" href="/game?mode=reverse" data-mode="reverse">
+    <h2>Reverse</h2>
+    <p>Press the key for the <strong>word</strong>, ignore the ink.</p>
+  </a>
+  <a class="card mode-card" href="/game?mode=speed" data-mode="speed">
+    <h2>Speed</h2>
+    <p>Classic, but the word vanishes after 700 ms.</p>
+  </a>
+  <a class="card mode-card" href="/room" data-mode="room">
+    <h2>Head-to-Head</h2>
+    <p>Same words, two players, one winner.</p>
+  </a>
+</section>
+
+<p class="key-hint">
+  Keys:
+  {% for key, color in keys.items() %}
+    <kbd style="color:{{ color_hex[color] }}">{{ key }}</kbd> {{ color }}{% if not loop.last %} &middot; {% endif %}
+  {% endfor %}
+</p>
+<p class="center"><a class="link" href="/leaderboard">See the leaderboard &rarr;</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Remember the name between visits and pass it along in the URL.
+  var input = document.getElementById("player-name");
+  input.value = localStorage.getItem("playerName") || "";
+  document.querySelectorAll(".mode-card").forEach(function (card) {
+    card.addEventListener("click", function (event) {
+      event.preventDefault();
+      var name = input.value.trim() || "Player";
+      localStorage.setItem("playerName", name);
+      var sep = card.getAttribute("href").indexOf("?") === -1 ? "?" : "&";
+      window.location.href = card.getAttribute("href") + sep + "name=" + encodeURIComponent(name);
+    });
+  });
+</script>
+{% endblock %}
