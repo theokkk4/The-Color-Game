@@ -1,0 +1,13 @@
+# results from play sessions (CSV, charts, report cards)
+results/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store

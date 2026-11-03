@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ mode|capitalize }} - The Color Game{% endblock %}
+{% block body_attrs %}data-mode="{{ mode }}" data-name="{{ name }}" data-auto-start="1"{% endblock %}
+{% block content %}
+<p class="mode-pill">{{ mode }} &middot; {{ name or "Player" }}</p>
+{% include "_board.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+{% endblock %}
