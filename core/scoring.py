@@ -1,11 +1,8 @@
-"""
-core/scoring.py - turns a list of result dicts into stats.
-Owner: Issaka
-
-Every function takes a list of results from record_answer() and never
-changes it. Reaction-time stats only count correct answers, because a
-wrong keypress tells us nothing about how fast the player read the color.
-"""
+# core/scoring.py - turns a list of result dicts into stats.  (Issaka)
+#
+# Every function takes a list of results from record_answer() and never
+# changes it. Reaction-time stats only count correct answers, because a
+# wrong keypress tells us nothing about how fast the player read the color.
 
 
 def mean_rt(results):
@@ -57,3 +54,5 @@ def summarize(results):
         "reaction_times": [r["reaction_ms"] for r in results],
         "correct_flags": [r["correct"] for r in results],
     }
+
+# TODO(Issaka): stroop_effect_ms reports 0 minus something when a player gets every congruent or every incongruent trial wrong, so return None in that case and let the results screen show a dash.

@@ -6,15 +6,17 @@ The Color Game
 
 ## In just a sentence or two, summarize your project. (E.g., "A website that lets you buy and sell stocks.")
 
-A web game based on the Stroop effect: the word says RED but it's printed in blue, and you have to hit the key for the ink color as fast as you can. Solo mode plus online head-to-head where two people race live.
+A Stroop effect reaction game rendered entirely in ASCII art. The word says RED but it's printed in blue, and you have to hit the key for the ink color as fast as you can. Solo modes plus head-to-head on one keyboard.
 
 ## In a paragraph or more, detail your project. What will your software do? What features will it have? How will it be executed?
 
-It's a Flask app with Flask-SocketIO so the browser and server can talk live, hosted on Render so anyone can play from a link. The page is HTML/CSS with a little JavaScript to show the word, catch keypresses, and time how fast you reacted. All the actual game logic is Python on the server: picking the words and colors, deciding if a trial is congruent or not, scoring, and running the multiplayer rooms.
+It's a pure Python desktop app. Tkinter makes the window, and every frame we draw into a small pixel buffer in Python, then turn each pixel into a text character (like ` .:-=+*#%@`) and paint it as colored monospace text. Menus, gameplay, and the intro all go through that one renderer so the whole game has a single look. pygame is only used for sound.
 
-Modes: Classic (answer the ink color), Reverse (answer the word), Speed (word vanishes after 700 ms), and Head-to-Head, where one person makes a room, gets a 4-letter code, the other joins, and the server sends them both the same trials at the same time with a live score bar and a winner screen.
+It opens with a short cinematic intro: an eye drawn out of characters opens, blinks, looks around, the iris cycles through the game's colors, then the camera dives through the pupil into a starfield where the title fades in.
 
-Every trial gets logged to a CSV (player, mode, word, ink color, congruent, correct, reaction time). A separate Python script reads that and spits out each player's average reaction time, accuracy, and Stroop effect (how much slower you are on mismatched trials), plus charts with matplotlib and a shareable results card.
+Modes: Classic (answer the ink color), Reverse (answer the word), Speed (word disappears after 700 ms), and Head-to-Head, where two players share a keyboard and race through the same trials with a split screen and a live score bar.
+
+Every trial gets logged to a CSV (player, mode, word, ink color, congruent, correct, reaction time). A separate script reads that and gives each player's average reaction time, accuracy, and Stroop effect (how much slower you are on mismatched trials), plus charts with matplotlib.
 
 ## If planning to combine 1051's final project with another course's final project, with which other course? And which aspect(s) of your proposed project would relate to 1051, and which aspect(s) would relate to the other course?
 
@@ -30,27 +32,26 @@ N/A
 
 ### In a sentence (or list of features), define a GOOD outcome for your final project. I.e., what WILL you accomplish no matter what?
 
-- Classic solo mode playable in the browser: menu, countdown, 30 trials, results with reaction time, accuracy, Stroop effect
-- Flask server running locally with the game logic in Python
+- The ASCII renderer works: pixel buffer to characters in a Tkinter window
+- Classic solo mode playable: menu, countdown, 30 trials, results with reaction time, accuracy, Stroop effect
 - Trials logged to CSV and a script that prints stats per player
 
 ### In a sentence (or list of features), define a BETTER outcome for your final project. I.e., what do you THINK you can accomplish before the final project's deadline?
 
-- Live on Render with a public link
-- Online head-to-head with room codes, live score bar, winner screen
+- The cinematic eye intro
+- Head-to-Head split screen on one keyboard
 - Reverse and Speed modes
-- Clean dark UI with animations and sound
-- Charts and a shareable results card image
-- Leaderboard
+- Sound, screen flash and shake on correct/wrong
+- Charts from the CSV and a leaderboard
 
 ### In a sentence (or list of features), define a BEST outcome for your final project. I.e., what do you HOPE to accomplish before the final project's deadline?
 
-- Tournament mode, up to 4 players in a room
 - Run 20+ students through it and answer one real question with the data (like: is the Stroop effect bigger after you've been studying for 30 minutes?) with a chart in a FINDINGS.md
 - Emotional Stroop variant (neutral vs loaded words)
+- A shareable results card image
 
 ## In a paragraph or more, outline your next steps. What new skills will you need to acquire? What topics will you need to research? If working with one of two classmates, who will do what?
 
-Week 1 we set up the repo and each build our own piece so nobody's blocked. Theo does the frontend (pages, CSS, animations, sound, the JS that talks to the server). Issaka does the engine (Flask server, trial generation, timing, scoring, head-to-head rooms). Oliver does the data side (CSV logging, analysis, charts, leaderboard). Week 2 we hook the pieces together and get solo mode working locally. Week 3 is head-to-head, the other modes, deploying to Render, and polish. Week 4 is the experiment, video, and README.
+Week 1 we set up the repo and each build our own piece so nobody's blocked. Theo does the renderer and UI (pixel buffer, character ramp, the Tkinter window, the intro animation, menus, screens). Issaka does the game engine (trial generation, timing, scoring, head-to-head rules). Oliver does the data side (CSV logging, analysis, charts, leaderboard). Week 2 we hook the pieces together and get Classic mode playable. Week 3 is head-to-head, the other modes, the intro polish. Week 4 is the experiment, video, and README.
 
-Stuff we need to learn: Flask and Flask-SocketIO, enough HTML/CSS/JS for the game screen, deploying Python on Render, timing reaction in the browser so network lag doesn't mess up the numbers, matplotlib, and the actual Stroop effect (Stroop, 1935) so our modes make sense. We'll use GitHub Desktop, everyone committing their own files, and meet in lab to merge and test.
+Stuff we need to learn: Tkinter (window, text widget, key events, a timed loop), how to draw shapes and text into a 2D list and convert brightness to characters, easing functions so animation feels smooth, timing keypresses accurately with `time.perf_counter()`, matplotlib for charts, and the actual Stroop effect (Stroop, 1935) so our modes make sense. We'll use GitHub Desktop, everyone on their own branch committing their own files, PRs into main weekly, and meet in lab to merge and test.

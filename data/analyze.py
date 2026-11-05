@@ -1,17 +1,14 @@
-"""
-data/analyze.py - reads results/trials.csv and turns it into stats and pictures.
-Owner: Oliver
-
-Run from the project root:   python -m data.analyze
-Charts are written to results/charts/, report cards to results/cards/.
-matplotlib and pillow are imported inside the functions that need them, so
-the web server never has to load them.
-"""
+# data/analyze.py - reads results/trials.csv and turns it into stats and charts.  (Oliver)
+#
+# Run from the project folder:   python -m data.analyze
+# Charts are written to results/charts/. matplotlib is imported inside
+# make_charts, so the game itself never has to load it.
 
 import csv
 import os
 
 from settings import TRIALS_CSV, RESULTS_DIR
+from core import scoring
 
 
 def load_trials(path=TRIALS_CSV):
@@ -29,12 +26,20 @@ def load_trials(path=TRIALS_CSV):
     return trials
 
 
-def group_runs(trials):
-    """Split rows into runs. One run = one player in one room in one mode."""
-    runs = {}
+def split_runs(trials):
+    """Split the rows into runs (one player playing one game).
+
+    Rows are in the order they were played, so a player's run starts every
+    time their trial_num goes back to 1.
+    """
+    open_runs = {}               # (player, mode) -> the run that player is in the middle of
+    runs = []
     for t in trials:
-        key = (t["player"], t["room"], t["mode"])
-        runs.setdefault(key, []).append(t)
+        key = (t["player"], t["mode"])
+        if t["trial_num"] == 1 or key not in open_runs:
+            open_runs[key] = []
+            runs.append(open_runs[key])
+        open_runs[key].append(t)
     return runs
 
 
@@ -43,74 +48,61 @@ def summarize(trials):
     by_player = {}
     for t in trials:
         by_player.setdefault(t["player"], []).append(t)
-    # core.scoring.summarize already knows how to do the math on a list of rows.
-    from core import scoring
     return {name: scoring.summarize(rows) for name, rows in by_player.items()}
 
 
 def make_charts(trials, out_dir=os.path.join(RESULTS_DIR, "charts")):
-    """Save a bar chart of congruent vs incongruent mean RT per player."""
+    """Save two dark-style charts and return their file paths."""
     import matplotlib
     matplotlib.use("Agg")            # draw to files, no window needed
     import matplotlib.pyplot as plt
 
-    os.makedirs(out_dir, exist_ok=True)
     stats = summarize(trials)
     if not stats:
-        return None
+        return []
+    os.makedirs(out_dir, exist_ok=True)
+    plt.style.use("dark_background")
+    paths = []
 
+    # 1. congruent vs incongruent mean reaction time, one pair of bars per player
     names = list(stats.keys())
     congruent = [stats[n]["congruent_rt"] for n in names]
     incongruent = [stats[n]["incongruent_rt"] for n in names]
     x = range(len(names))
-
     plt.figure(figsize=(8, 4))
-    plt.bar([i - 0.2 for i in x], congruent, width=0.4, label="congruent")
-    plt.bar([i + 0.2 for i in x], incongruent, width=0.4, label="incongruent")
+    plt.bar([i - 0.2 for i in x], congruent, width=0.4, label="word matches ink", color="#1FFF6B")
+    plt.bar([i + 0.2 for i in x], incongruent, width=0.4, label="word differs from ink", color="#FF2A2A")
     plt.xticks(list(x), names)
     plt.ylabel("mean reaction time (ms)")
     plt.title("Stroop effect per player")
     plt.legend()
-    path = os.path.join(out_dir, "stroop_by_player.png")
-    plt.savefig(path, bbox_inches="tight")
+    paths.append(os.path.join(out_dir, "stroop_by_player.png"))
+    plt.savefig(paths[-1], bbox_inches="tight")
     plt.close()
-    return path
 
-# TODO(Oliver): make_charts should also draw a histogram of reaction times and an RT-over-trial line per run.
+    # 2. how the correct reaction times are spread out
+    plt.figure(figsize=(8, 4))
+    same = [t["reaction_ms"] for t in trials if t["correct"] and t["congruent"]]
+    different = [t["reaction_ms"] for t in trials if t["correct"] and not t["congruent"]]
+    plt.hist([same, different], bins=20, label=["word matches ink", "word differs from ink"],
+             color=["#1FFF6B", "#FF2A2A"])
+    plt.xlabel("reaction time (ms)")
+    plt.ylabel("number of answers")
+    plt.title("Reaction times, correct answers only")
+    plt.legend()
+    paths.append(os.path.join(out_dir, "reaction_times.png"))
+    plt.savefig(paths[-1], bbox_inches="tight")
+    plt.close()
+    return paths
 
-
-def make_report_card(player, summary, out_dir=os.path.join(RESULTS_DIR, "cards")):
-    """Save a small PNG 'report card' image for one player using Pillow."""
-    from PIL import Image, ImageDraw
-
-    os.makedirs(out_dir, exist_ok=True)
-    img = Image.new("RGB", (480, 260), "#1A1D27")
-    draw = ImageDraw.Draw(img)
-    lines = [
-        "THE COLOR GAME - report card",
-        "Player: %s" % player,
-        "Mean RT: %d ms" % summary["mean_rt"],
-        "Accuracy: %d%%" % round(summary["accuracy"] * 100),
-        "Stroop effect: %d ms" % summary["stroop_effect_ms"],
-    ]
-    y = 30
-    for line in lines:
-        draw.text((30, y), line, fill="#E6E8EF")
-        y += 40
-    path = os.path.join(out_dir, "%s.png" % player.replace(" ", "_"))
-    img.save(path)
-    return path
-
-# TODO(Oliver): make_report_card should use the Inter font from static/fonts and the accent color, and look like the results screen.
+# TODO(Oliver): add a chart of reaction time over trial number (1 to 30) to see whether players speed up or get tired during a run.
 
 
 if __name__ == "__main__":
     rows = load_trials()
-    print("Loaded %d trial rows" % len(rows))
+    print("Loaded %d trial rows in %d runs" % (len(rows), len(split_runs(rows))))
     for name, s in summarize(rows).items():
         print("%-12s mean RT %4d ms   accuracy %3d%%   stroop %+d ms" % (
             name, s["mean_rt"], round(s["accuracy"] * 100), s["stroop_effect_ms"]))
-    if rows:
-        print("Chart saved to", make_charts(rows))
-        for name, s in summarize(rows).items():
-            print("Card saved to", make_report_card(name, s))
+    for path in make_charts(rows):
+        print("Chart saved to", path)

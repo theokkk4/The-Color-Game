@@ -1,11 +1,8 @@
-"""
-data/logger.py - appends one row per trial to results/trials.csv.
-Owner: Oliver
-
-The server calls log_trial(result) right after each answer. The result dict
-must contain player, mode, room, and every field from record_answer().
-We add the timestamp here so the clock is always the server's.
-"""
+# data/logger.py - appends one row per trial to results/trials.csv.  (Oliver)
+#
+# The game calls log_trial(result) right after each answer. The result dict
+# must contain player and every field from record_answer(). We add the
+# timestamp here so every row gets its time the same way.
 
 import csv
 import os
@@ -28,4 +25,4 @@ def log_trial(result):
             writer.writeheader()
         writer.writerow(row)
 
-# TODO(Oliver): decide whether to also log abandoned runs (player disconnects mid-game) or only complete ones.
+# TODO(Oliver): decide whether to also log abandoned runs (player quits with Escape mid-game) or only complete ones.
