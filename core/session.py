@@ -1,30 +1,21 @@
-"""
-core/session.py - checks one answer against one trial.
-Owner: Issaka
-
-The browser measures reaction time and sends it to us. We only decide
-whether the key was right and build the result row that gets logged.
-"""
-
-import os
-import sys
-
-# When run as a plain script (python core/session.py), Python only sees the
-# core/ folder. Add the project root so "settings" and "core.*" import.
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# core/session.py - checks one answer against one trial.  (Issaka)
+#
+# The game scene measures the reaction time and hands it to us. We only
+# decide whether the key was right and build the result row that gets logged.
 
 from settings import KEYS
 
 
-def record_answer(trial, key, reaction_ms):
+def record_answer(trial, key, reaction_ms, keys=KEYS):
     """
     Return a result dict for this trial.
 
-    key         - the letter the player pressed ("r", "g", "b", "y", "p")
-    reaction_ms - milliseconds from word shown to keypress, measured in the browser
+    key         - the key the player pressed, or None if they ran out of time
+    reaction_ms - milliseconds from the word being drawn to the keypress
+    keys        - which key means which color (head to head passes its own)
     """
     key = (key or "").lower()
-    response = KEYS.get(key, "none")     # "none" means an unknown key or a timeout
+    response = keys.get(key, "none")     # "none" means an unknown key or a timeout
     correct = response == trial["answer"]
 
     try:
@@ -43,9 +34,11 @@ def record_answer(trial, key, reaction_ms):
         "reaction_ms": reaction_ms,
     }
 
+# TODO(Issaka): throw out answers faster than about 150 ms, since nobody can read a color that quickly and it means a held or mashed key.
+
 
 # ---------------------------------------------------------------------------
-# Tiny terminal demo:  python core/session.py   (or: python -m core.session)
+# Tiny terminal demo, run from the project folder:   python -m core.session
 # Plays 5 classic trials in the terminal using ANSI colors for the ink.
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":

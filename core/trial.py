@@ -1,18 +1,14 @@
-"""
-core/trial.py - builds the trials (word + ink color) for one run.
-Owner: Issaka
-
-A trial is a plain dict:
-    {"trial_num": 1, "word": "red", "ink_color": "blue",
-     "congruent": False, "mode": "classic", "answer": "blue"}
-
-"answer" is the color name the player must press. It stays on the server;
-the browser never sees it (see public_trial below).
-"""
+# core/trial.py - builds the trials (word + ink color) for one run.  (Issaka)
+#
+# A trial is a plain dict:
+#     {"trial_num": 1, "word": "red", "ink_color": "blue",
+#      "congruent": False, "mode": "classic", "answer": "blue"}
+#
+# "answer" is the color the player has to press.
 
 import random
 
-from settings import COLORS, CONGRUENT_RATIO, TRIALS_PER_RUN, SPEED_HIDE_MS
+from settings import COLORS, CONGRUENT_RATIO, TRIALS_PER_RUN
 
 
 def make_trial(mode, trial_num=1):
@@ -26,7 +22,7 @@ def make_trial(mode, trial_num=1):
         other_colors = [c for c in COLORS if c != word]
         ink_color = random.choice(other_colors)
 
-    # "reverse" asks for the word; classic and speed ask for the ink color.
+    # "reverse" asks for the word; every other mode asks for the ink color.
     if mode == "reverse":
         answer = word
     else:
@@ -43,18 +39,7 @@ def make_trial(mode, trial_num=1):
 
 
 def make_trials(mode, n=TRIALS_PER_RUN):
-    """Return a list of n trials. Both players in a room get this same list."""
+    """Return a list of n trials. In head to head both players get this same list."""
     return [make_trial(mode, i + 1) for i in range(n)]
 
-
-def public_trial(trial, total):
-    """Copy of a trial that is safe to send to the browser (no answer)."""
-    hide_after_ms = SPEED_HIDE_MS if trial["mode"] == "speed" else 0
-    return {
-        "trial_num": trial["trial_num"],
-        "total": total,
-        "word": trial["word"],
-        "ink_color": trial["ink_color"],
-        "mode": trial["mode"],
-        "hide_after_ms": hide_after_ms,
-    }
+# TODO(Issaka): stop the same word + ink pair from coming up twice in a row, which makes the second one too easy.

@@ -1,5 +1,6 @@
-flask
-flask-socketio
-eventlet
+# Only needed for extras: the game itself runs on plain Python (Tkinter).
+# pygame-ce plays the sound effects. It is the same "import pygame" as pygame,
+# but it installs on the newest Python versions, where plain pygame does not yet.
+pygame-ce
+# matplotlib draws the charts in data/analyze.py.
 matplotlib
-pillow

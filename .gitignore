@@ -1,4 +1,4 @@
-# results from play sessions (CSV, charts, report cards)
+# results from play sessions (CSV, charts)
 results/
 
 # python
@@ -11,3 +11,8 @@ venv/
 .vscode/
 .idea/
 .DS_Store
+
+# personal videos and music, not part of the game
+*.mp4
+*.mov
+/music/
